@@ -9,7 +9,7 @@ electron 版的飞书，对网页版本进行封装
 - 新消息提醒，小图标闪烁
 - 解除浏览器限制
 
-
+![screen-shot](screenshot/electron-lark-1.png)
 
 ## 安装方法
 
