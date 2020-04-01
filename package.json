@@ -1,0 +1,12 @@
+{
+    "name": "Feishu",
+    "version": "0.0.1",
+    "main": "main.js",
+    "scripts": {
+      "start": "electron ."
+    },
+    "devDependencies": {
+      "electron": "^8.2.0"
+    }
+  }
+  
