@@ -1,8 +1,11 @@
+'use strict';
+
+const appConf = require("./configuration")
+
 const electron = require('electron')
 const app = electron.app
 const ipcMain = electron.ipcMain
 const BrowserWindow = electron.BrowserWindow
-const path = require('path')
 const Menu = electron.Menu
 if (process.mas) app.setName('飞书Feishu')
 
@@ -36,7 +39,7 @@ function createWindow() {
         webPreferences: {
             // nodeIntegration: true
         },
-        icon: path.join(__dirname, "/icon/128.png")
+        icon: appConf.icon128
     })
 
     // mainWindow.loadFile('index.html')
@@ -118,9 +121,9 @@ function startBlingIcon() {
     blingTimer = setInterval(function () {
         blingCount++;
         if (blingCount % 2 == 0) {
-            appTray.setImage(path.join(__dirname, '/icon/dock/32empty.png'))
+            appTray.setImage(appConf.dock32Empty)
         } else {
-            appTray.setImage(path.join(__dirname, '/icon/dock/32.png'))
+            appTray.setImage(appConf.dock32)
         }
     }, 500);
 }
@@ -130,7 +133,7 @@ function stopBlingIcon() {
         clearInterval(blingTimer)
         blingTimer = null;
     }
-    appTray.setImage(path.join(__dirname, '/icon/dock/32.png'))
+    appTray.setImage(appConf.dock32)
 }
 // 关于图标闪烁的启动，查看 webContents.on("did-finish-load",callback) 回调
 //------------------------------------
@@ -321,7 +324,7 @@ app.on('ready', function () {
     ];
     // 托盘图标
     //系统托盘图标目录
-    appTray = new Tray(path.join(__dirname, '/icon/dock/32.png'));
+    appTray = new Tray(appConf.dock32);
     //图标的上下文菜单
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     //设置此托盘图标的悬停提示内容
