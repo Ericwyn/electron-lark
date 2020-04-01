@@ -25,9 +25,7 @@ ipcMain.on('ping', () => {
 })
 
 // 托盘对象
-const Tray = electron.Tray;
-let appTray = null;
-
+let appTray = require("./windows/app_tray");
 
 let mainWindow
 let webContents
@@ -313,32 +311,19 @@ app.on('ready', function () {
     
     //---------------------- 系统托盘 ------------------------------
     //系统托盘右键菜单
-    let trayMenuTemplate = [
-        {
-            label: '退出',
-            click: function () {
-                app.quit();
-                mainWindow.destroy()
-            }
-        }
-    ];
+    appTray.init(electron, app, mainWindow)
+
     // 托盘图标
-    //系统托盘图标目录
-    appTray = new Tray(appConf.dock32);
-    //图标的上下文菜单
-    const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
-    //设置此托盘图标的悬停提示内容
-    appTray.setToolTip('Feishu');
-    //设置此图标的上下文菜单
-    appTray.setContextMenu(contextMenu);
-    //单击右下角小图标显示应用
-    appTray.on('click', function () {
+    appTray.setOnClick(function () {
         stopBlingIcon();
         mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
         mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
     })
+    appTray.setOnClose(function(){
+        app.quit();
+        mainWindow.destroy()
+    })
     //---------------------- 系统托盘 End ------------------------------
-
     createWindow();
 })
 
