@@ -106,6 +106,12 @@ function createWindow() {
 var blingCount = 0;
 var blingTimer = null;
 function startBlingIcon() {
+    // 部分修复ubuntu18.04 下面锁屏之后 dock 图标一直不显示的问题
+    // 每次 start bling 之前重新设置一遍
+    // 保证哪怕因为锁屏而 dock 图标消失之后，收到新消息也可以闪烁
+    appTray.appTray.destroy()
+    appTray.init(electron, app, mainWindow)
+
     // 如果是焦点的话，就不闪烁
     if (onFocus && mainWindow.isVisible()) {
         stopBlingIcon()
