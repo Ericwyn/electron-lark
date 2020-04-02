@@ -20,10 +20,10 @@ app.on('browser-window-focus', function () {
 app.allowRendererProcessReuse = true
 
 // 托盘对象
-var appTray = require("./windows/app_tray");
+const appTray = require("./windows/app_tray");
 
 // 菜单 Template 
-var appMenu = require("./windows/app_menu")
+const appMenu = require("./windows/app_menu")
 
 
 var mainWindow
@@ -150,7 +150,6 @@ app.on('ready', function () {
     
     //系统托盘
     //系统托盘右键菜单
-    appTray.init(electron, app, mainWindow)
     // 托盘图标
     appTray.setOnClick(function () {
         stopBlingIcon();
@@ -161,6 +160,8 @@ app.on('ready', function () {
         app.quit();
         mainWindow.destroy()
     })
+    // 先设置 cb 然后再 init 
+    appTray.init(electron, app, mainWindow)
 
     createWindow();
 })
