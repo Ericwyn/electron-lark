@@ -15,9 +15,8 @@ class AppTray{
 
 // 设置图片
 AppTray.prototype.setImage = function (image) {
-    console.log(image)
     if(this.appTray != undefined) {
-        this.AppTray.setImage(image)
+        this.appTray.setImage(image)
     }
 }
 
