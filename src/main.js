@@ -25,6 +25,7 @@ const appTray = require("./windows/app_tray");
 // 菜单 Template 
 const appMenu = require("./windows/app_menu")
 
+const globalShortcut = electron.globalShortcut;
 
 var mainWindow
 var webContents
@@ -169,6 +170,16 @@ app.on('ready', function () {
     // 先设置 cb 然后再 init 
     appTray.init(electron, app, mainWindow)
 
+    // globalShortcut.register('CommandOrControl+shift+m', () => {
+    //     console.log('CommandOrControl+shift+m is pressed')
+    // })
+    globalShortcut.register('alt+shift+m', () => {
+        // console.log('alt+shift+m is pressed')
+        appTray.appTray.destroy()
+        appTray.init(electron, app, mainWindow)
+        mainWindow.show()
+        mainWindow.setSkipTaskbar(true);
+    })
     createWindow();
 })
 
