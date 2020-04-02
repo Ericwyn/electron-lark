@@ -1,6 +1,6 @@
-# Feishu-Electron
+# Electron-Lark
 
-electron 版的飞书，对网页版本进行封装
+electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 
 相比起普通网页版，功能如下
 
