@@ -1,12 +1,43 @@
 {
-    "name": "Feishu",
-    "version": "0.0.1",
-    "main": "src/main.js",
-    "scripts": {
-      "start": "electron ."
-    },
-    "devDependencies": {
-      "electron": "^8.2.0"
+  "name": "Feishu",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "description": "An Electron application for Feishu(Lark)",
+  "author": "Ericwyn <ericwyn@meetwhy.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ericwyn/electron-lark.git"
+  },
+  "keywords": [
+    "Electron",
+    "Feishu",
+    "Lark",
+    "飞书"
+  ],
+  "bugs": "https://github.com/Ericwyn/electron-lark/issues",
+  "homepage": "https://github.com/Ericwyn/electron-lark",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^8.2.0",
+    "electron-builder": "^22.4.1",
+    "electron-package": "^0.1.0"
+  },
+  "linux": {
+    "category": "Office",
+    "packageCategory": "Office",
+    "synopsis": "An Electron application for Feishu(Lark)",
+    "icon": "./build/icons",
+    "target": [   
+      {
+        "target": "deb",
+        "arch": [  "x64" ]
+      } 
+    ],
+    "desktop": {
+      "Encoding": "UTF-8"
     }
   }
-  
+}
