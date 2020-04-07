@@ -11,15 +11,18 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 
 已知问题
  - ubuntu18.04 Gnome 桌面，锁屏之后，系统通知栏图标 Tray 会消失
-    - 当前规避方案：当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁
-    - 也可以使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
+    - ~~当前规避方案：当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁~~
+    - 使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
 
 
 ## 运行截图
 
 ![screen-shot](screenshot/electron-lark-1.png)
 
-## 安装方法
+## 安装方法 (二进制安装)
+ - 请从 [Release](https://github.com/Ericwyn/electron-lark/releases) 页面直接下载及安装 （仅支持 debian 和 ubuntu ，ubuntu 18.04 上测试通过）
+
+## 安装方法 (从源码安装)
 
 ### 0. 安装 NodeJs
 请先按照官网教程安装 NodeJs，确保以下命令可以成功运行
@@ -54,3 +57,8 @@ electron -v
 ```
 electron .
 ```
+
+## 版本记录
+
+### v1.0.0
+ - 初始版本
