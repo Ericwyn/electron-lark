@@ -3,11 +3,12 @@
 const appConf = require("./configuration")
 
 const electron = require('electron')
-const app = electron.app
-const ipcMain = electron.ipcMain
-const BrowserWindow = electron.BrowserWindow
-const Menu = electron.Menu
-if (process.mas) app.setName('飞书Feishu')
+const shell = electron.shell;
+const app = electron.app;
+const ipcMain = electron.ipcMain;
+const BrowserWindow = electron.BrowserWindow;
+const Menu = electron.Menu;
+if (process.mas) app.setName('飞书Feishu');
 
 // 是否处于焦点，检点监听
 var onFocus = false;
@@ -81,23 +82,34 @@ function createWindow() {
     webContents.on("new-window", function(event, url, frameName, disposition, options, features, referer){
         // feishu.cn/calendar/ 日历
         // feishu.cn/space/home/ 文档
+        // console.log("打开 url " + url)
+        event.preventDefault()
 
         // hack 所有新页面的打开
-        // 将所有打开的新页面的 user agent 也重新设置，避免提示浏览器错误
-        event.preventDefault()
-        const win = new BrowserWindow({
-            width: 1200,
-            height: 600,
-          webContents: options.webContents,
-          show: false
-        })
-        win.once('ready-to-show', () => win.show())
-        if (!options.webContents) {
-          win.loadURL(url,{
-            userAgent : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36"
-          })
+        // 如果是跳转外部连接的话， 用默认浏览器打开
+        if(url.indexOf("https://security.feishu.cn/link/safety?target=") == 0){
+            url = url.replace("https://security.feishu.cn/link/safety?target=", "")
+            url = decodeURIComponent(url);
+            shell.openExternal(url)
+            return;
+        } else {
+            // 如果不是跳转到外部的链接
+            // 将所有打开的新页面的 user agent 也重新设置，避免提示浏览器错误
+            const win = new BrowserWindow({
+                width: 1200,
+                height: 600,
+              webContents: options.webContents,
+              show: false
+            })
+            win.once('ready-to-show', () => win.show())
+            if (!options.webContents) {
+              win.loadURL(url,{
+                userAgent : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36"
+              })
+            }
+            event.newGuest = win;
         }
-        event.newGuest = win    
+
     })
 
     // 打开开发者模式
@@ -110,8 +122,8 @@ function startBlingIcon() {
     // 部分修复ubuntu18.04 下面锁屏之后 dock 图标一直不显示的问题
     // 每次 start bling 之前重新设置一遍
     // 保证哪怕因为锁屏而 dock 图标消失之后，收到新消息也可以闪烁
-    appTray.appTray.destroy()
-    appTray.init(electron, app, mainWindow)
+    // appTray.appTray.destroy()
+    // appTray.init(electron, app, mainWindow)
 
     // 如果是焦点的话，就不闪烁
     if (onFocus && mainWindow.isVisible()) {
