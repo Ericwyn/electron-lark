@@ -74,7 +74,7 @@ function createWindow() {
                         stopBlingIcon();
                     }
                 })
-
+            webContents.executeJavaScript(`if(document.getElementsByClassName('lark-water-mark-main').length > 0) document.getElementsByClassName('lark-water-mark-main')[0].remove()`)
         }, 1500);
     })
 
