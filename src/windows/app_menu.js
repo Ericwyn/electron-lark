@@ -7,42 +7,46 @@
 let template = [
     {
         label: '操作',
-        submenu: [{
-            label: '复制',
-            accelerator: 'CmdOrCtrl+C',
-            role: 'copy'
-        }, {
-            label: '粘贴',
-            accelerator: 'CmdOrCtrl+V',
-            role: 'paste'
-        }, {
-            label: '重新加载',
-            accelerator: 'CmdOrCtrl+R',
-            click: function (item, focusedWindow) {
-                if (focusedWindow) {
-                    // on reload, start fresh and close any old
-                    // open secondary windows
-                    if (focusedWindow.id === 1) {
-                        BrowserWindow.getAllWindows().forEach(function (win) {
-                            if (win.id > 1) {
-                                win.close()
-                            }
-                        })
-                    }
-                    focusedWindow.reload()
-                }
-            }
-        }]
+        submenu: [
+            // {
+            //     label: '复制',
+            //     accelerator: 'CmdOrCtrl+C',
+            //     role: 'copy'
+            // }, 
+            // {
+            //     label: '粘贴',
+            //     accelerator: 'CmdOrCtrl+V',
+            //     role: 'paste'
+            // }, 
+            // {
+            //     label: '重新加载',
+            //     accelerator: 'CmdOrCtrl+R',
+            //     click: function (item, focusedWindow) {
+            //         if (focusedWindow) {
+            //             // on reload, start fresh and close any old
+            //             // open secondary windows
+            //             if (focusedWindow.id === 1) {
+            //                 BrowserWindow.getAllWindows().forEach(function (win) {
+            //                     if (win.id > 1) {
+            //                         win.close()
+            //                     }
+            //                 })
+            //             }
+            //             focusedWindow.reload()
+            //         }
+            //     }
+            // }
+        ]
     },
     {
         label: '窗口',
         role: 'window',
         submenu: [{
-            label: 'Minimize ( 最小化 )',
+            label: '最小化',
             accelerator: 'CmdOrCtrl+M',
             role: 'minimize'
         }, {
-            label: 'Close ( 关闭 )',
+            label: '关闭',
             accelerator: 'CmdOrCtrl+W',
             role: 'close'
         }, {
@@ -69,7 +73,7 @@ let template = [
         submenu: [{
             label: 'Github',
             click: function () {
-                require('electron').shell.openExternal('https://github.com/Ericwyn')
+                require('electron').shell.openExternal('https://github.com/Ericwyn/electron-lark')
             }
         }]
     }
@@ -142,16 +146,35 @@ AppMenu.prototype.init = function( electron ){
         addUpdateMenuItems(electron, helpMenu, 0)
     }
 
+    // template.unshift({
+    //     label: "飞书",
+    //     submenu: [{
+    //         label: 'Quit ( 退出 )',
+    //         accelerator: 'Command+Q',
+    //         click: function () {
+    //             electron.app.quit()
+    //         }
+    //     }]
+    // })
+    template[0].submenu.push({
+        label: '退出',
+        // accelerator: 'Command+Q',
+        click: function () {
+            electron.app.quit()
+        }
+    })
+
+
     // 针对Mac端的一些配置
     if (process.platform === 'darwin') {
-        const name = electron.app.getName()
+        // const name = electron.app.getName()
         template.unshift({
-            label: name,
+            label: "飞书",
             submenu: [{
                 label: 'Quit ( 退出 )',
                 accelerator: 'Command+Q',
                 click: function () {
-                    app.quit()
+                    electron.app.quit()
                 }
             }]
         })
