@@ -14,10 +14,18 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
     - ~~当前规避方案：当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁~~
     - 使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
 
-
 ## 运行截图
 
 ![screen-shot](screenshot/electron-lark-1.png)
+
+## 版本记录
+
+### v1.0.0
+ - 初始版本
+
+### v1.0.1
+ - 去除页面水印
+ - 修改了应用菜单,去除无用按钮
 
 ## 安装方法 (二进制安装)
  - 请从 [Release](https://github.com/Ericwyn/electron-lark/releases) 页面直接下载及安装 （仅支持 debian 和 ubuntu ，ubuntu 18.04 上测试通过）
@@ -57,8 +65,3 @@ electron -v
 ```
 electron .
 ```
-
-## 版本记录
-
-### v1.0.0
- - 初始版本
