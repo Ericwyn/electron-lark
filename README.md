@@ -10,9 +10,14 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 - 解除浏览器限制，避免因浏览器版本不对而提示无法使用
 
 已知问题
- - ubuntu18.04 Gnome 桌面，锁屏之后，系统通知栏图标 Tray 会消失
-    - ~~当前规避方案：当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁~~
+ - ubuntu18.04 Gnome 桌面，锁屏之后，系统通知栏图标 Tray 会消失, 当前规避方案如下
+    - ~~当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁~~
     - 使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
+
+ ***下载地址: [Release](https://github.com/Ericwyn/electron-lark/releases)***
+
+(另外有一说一, 飞书的技术架构就是基于 Electron 的, Windows 和 Mac 客户端也都是使用 Electron 打包, 既然如此为什么不顺便为 Linux 也提供支持呢 ?)
+
 
 ## 运行截图
 
@@ -28,7 +33,7 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
  - 修改了应用菜单,去除无用按钮
 
 ## 安装方法 (二进制安装)
- - 请从 [Release](https://github.com/Ericwyn/electron-lark/releases) 页面直接下载及安装 （仅支持 debian 和 ubuntu ，ubuntu 18.04 上测试通过）
+ - 请从 [Release](https://github.com/Ericwyn/electron-lark/releases) 页面直接下载及安装 （ubuntu 18.04 上测试通过）
 
 ## 安装方法 (从源码安装)
 
