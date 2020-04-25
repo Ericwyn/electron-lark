@@ -1,5 +1,5 @@
 {
-  "name": "Feishu",
+  "name": "electron-lark",
   "version": "1.0.0",
   "main": "src/main.js",
   "description": "An Electron application for Feishu(Lark)",
@@ -21,7 +21,7 @@
     "start": "electron ."
   },
   "devDependencies": {
-    "electron": "^8.2.0",
+    "electron": "^8.2.2",
     "electron-builder": "^22.4.1",
     "electron-package": "^0.1.0"
   },
@@ -30,11 +30,13 @@
     "packageCategory": "Office",
     "synopsis": "An Electron application for Feishu(Lark)",
     "icon": "./build/icons",
-    "target": [   
+    "target": [
       {
         "target": "deb",
-        "arch": [  "x64" ]
-      } 
+        "arch": [
+          "x64"
+        ]
+      }
     ],
     "desktop": {
       "Encoding": "UTF-8"
