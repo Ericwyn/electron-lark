@@ -66,7 +66,7 @@ function createWindow() {
             if(mainWindow != null && !mainWindow.isVisible){
                 return
             }
-            webContents.executeJavaScript(`document.getElementsByClassName('navbarMenu-badge').length`)
+            webContents.executeJavaScript(`document.getElementsByClassName('larkc-badge-count circle larkc-badge-normal').length`)
                 .then(function(result){
                     if(parseInt(result) > 0) {
                         startBlingIcon();
