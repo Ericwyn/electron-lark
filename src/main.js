@@ -5,7 +5,6 @@ const appConf = require("./configuration")
 const electron = require('electron')
 const shell = electron.shell;
 const app = electron.app;
-const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 if (process.mas) app.setName('飞书Feishu');
@@ -20,16 +19,14 @@ app.on('browser-window-focus', function () {
 })
 app.allowRendererProcessReuse = true
 
-// 托盘对象
-const appTray = require("./windows/app_tray");
 
 // 菜单 Template 
 const appMenu = require("./windows/app_menu")
 
 const globalShortcut = electron.globalShortcut;
 
-var mainWindow
-var webContents
+let mainWindow
+let webContents
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -66,6 +63,7 @@ function createWindow() {
             if(mainWindow != null && !mainWindow.isVisible){
                 return
             }
+            // 注入 消息监听
             webContents.executeJavaScript(`document.getElementsByClassName('larkc-badge-count circle larkc-badge-normal').length`)
                 .then(function(result){
                     if(parseInt(result) > 0) {
@@ -74,6 +72,7 @@ function createWindow() {
                         stopBlingIcon();
                     }
                 })
+            // 注入水印去除
             webContents.executeJavaScript(`if(document.getElementsByClassName('lark-water-mark-main').length > 0) document.getElementsByClassName('lark-water-mark-main')[0].remove()`)
         }, 1500);
     })
@@ -116,15 +115,39 @@ function createWindow() {
     // mainWindow.toggleDevTools()
 }
 
-var blingCount = 0;
-var blingTimer = null;
-function startBlingIcon() {
-    // 部分修复ubuntu18.04 下面锁屏之后 dock 图标一直不显示的问题
-    // 每次 start bling 之前重新设置一遍
-    // 保证哪怕因为锁屏而 dock 图标消失之后，收到新消息也可以闪烁
-    // appTray.appTray.destroy()
-    // appTray.init(electron, app, mainWindow)
 
+// ------------------------ Tray ------------------------------------
+let blingCount = 0;
+let blingTimer = null;
+let appTryaInstance;
+
+const trayMenuTemplate = [
+    {
+        label: '退出',
+        click: function(){
+            console.log("从 tray 退出")
+            app.quit();
+            mainWindow.destroy()
+        }
+    }
+];
+const contextMenu = electron.Menu.buildFromTemplate(trayMenuTemplate)
+const dock32Icon = electron.nativeImage.createFromPath(appConf.dock32)
+const dock32EmptyIcon = electron.nativeImage.createFromPath(appConf.dock32Empty)
+
+function appTrayInit(){
+    appTryaInstance = new electron.Tray(dock32Icon)
+    appTryaInstance.setToolTip('Feishu1111');
+    appTryaInstance.setContextMenu(contextMenu);
+    appTryaInstance.on('click',function () {
+        stopBlingIcon();
+        mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+        mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
+    })
+
+}
+
+function startBlingIcon() {
     // 如果是焦点的话，就不闪烁
     if (onFocus && mainWindow.isVisible()) {
         stopBlingIcon()
@@ -136,9 +159,9 @@ function startBlingIcon() {
     blingTimer = setInterval(function () {
         blingCount++;
         if (blingCount % 2 == 0) {
-            appTray.setImage(appConf.dock32Empty)
+            appTryaInstance.setImage(dock32EmptyIcon)
         } else {
-            appTray.setImage(appConf.dock32)
+            appTryaInstance.setImage(dock32Icon)
         }
     }, 500);
 }
@@ -148,13 +171,46 @@ function stopBlingIcon() {
         clearInterval(blingTimer)
         blingTimer = null;
     }
-    appTray.setImage(appConf.dock32)
+    appTryaInstance.setImage(appConf.dock32)
 }
 
 
 // 修复 Application Menu上图标不显示
 if (process.env.XDG_CURRENT_DESKTOP == 'ubuntu:GNOME') {
     process.env.XDG_CURRENT_DESKTOP = 'Unity';
+}
+
+// 通过监听屏幕 LOCK 和 UNLOCK 来重新 init tray
+// 解决锁屏后 tray 消失的问题
+let os = require("os");
+const spawn  = require('child_process')
+let monit = null;
+if(os.platform() === 'linux'){
+    // console.log('设置屏幕监听')
+    monit = spawn.exec(`dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver'" |
+    while read x; do
+      case "$x" in 
+        *"boolean true"*) echo SCREEN_LOCKED;;
+        *"boolean false"*) echo SCREEN_UNLOCKED;;  
+      esac
+    done `)
+
+    monit.stdout.on('data', (data) => {
+        // console.log('监听到屏幕重启')
+        const out = data.toString().trim()
+        if (out === 'SCREEN_UNLOCKED') {
+            appTryaInstance.destroy()
+            appTrayInit()
+        }
+    })
+
+    monit.stderr.on('data', function (data) {
+        console.log('stderr: ' + data);
+    });
+
+    monit.on('exit', function (code) {
+        console.log('child process exited with code ' + code);
+    });    
 }
 
 
@@ -167,28 +223,13 @@ app.on('ready', function () {
     // 设置菜单部分
     Menu.setApplicationMenu(menu) 
     
-    //系统托盘
-    //系统托盘右键菜单
-    // 托盘图标
-    appTray.setOnClick(function () {
-        stopBlingIcon();
-        mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-        mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
-    })
-    appTray.setOnClose(function(){
-        app.quit();
-        mainWindow.destroy()
-    })
-    // 先设置 cb 然后再 init 
-    appTray.init(electron, app, mainWindow)
+    //系统托盘 init
+    appTrayInit()
 
-    // globalShortcut.register('CommandOrControl+shift+m', () => {
-    //     console.log('CommandOrControl+shift+m is pressed')
-    // })
     globalShortcut.register('alt+shift+m', () => {
         // console.log('alt+shift+m is pressed')
-        appTray.appTray.destroy()
-        appTray.init(electron, app, mainWindow)
+        appTryaInstance.destroy()
+        appTrayInit()
         mainWindow.show()
         mainWindow.setSkipTaskbar(true);
     })
