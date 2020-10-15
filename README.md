@@ -10,9 +10,10 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 - 解除浏览器限制，避免因浏览器版本不对而提示无法使用
 
 已知问题
- - ubuntu18.04 Gnome 桌面，锁屏之后，系统通知栏图标 Tray 会消失, 当前规避方案如下
+ - ~~ubuntu18.04 Gnome 桌面，锁屏之后，系统通知栏图标 Tray 会消失, 当前规避方案如下~~
     - ~~当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁~~
     - 使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
+    - V1.0.3 版本已修复，添加了一个 linux 锁屏监听，自动 reset appTray
 
  ***下载地址: [Release](https://github.com/Ericwyn/electron-lark/releases)***
 
