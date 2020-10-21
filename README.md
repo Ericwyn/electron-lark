@@ -25,13 +25,20 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 ![screen-shot](screenshot/electron-lark-1.png)
 
 ## 版本记录
+ 
+### v1.0.3
+ - 修复 ubuntu 下锁屏后 appTray 消失的问题
 
-### v1.0.0
- - 初始版本
+### v1.0.2
+ - 修复已关闭提醒的聊天仍然会闪烁 tray icon 的问题
 
 ### v1.0.1
  - 去除页面水印
  - 修改了应用菜单,去除无用按钮
+
+### v1.0.0
+ - 初始版本
+
 
 ## 安装方法 (二进制安装)
  - 请从 [Release](https://github.com/Ericwyn/electron-lark/releases) 页面直接下载及安装 （ubuntu 18.04 上测试通过）
