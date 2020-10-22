@@ -1,5 +1,10 @@
 # Electron-Lark
 
+ ![release-download-count](https://img.shields.io/github/downloads/Ericwyn/electron-lark/total.svg)
+
+ ***下载地址: [Release](https://github.com/Ericwyn/electron-lark/releases)***
+
+
 electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 
 相比起普通网页版，功能如下
@@ -15,7 +20,6 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
     - 使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
     - V1.0.3 版本已修复，添加了一个 linux 锁屏监听，自动 reset appTray
 
- ***下载地址: [Release](https://github.com/Ericwyn/electron-lark/releases)***
 
 (另外有一说一, 飞书的技术架构就是基于 Electron 的, Windows 和 Mac 客户端也都是使用 Electron 打包, 既然如此为什么不顺便为 Linux 也提供支持呢 ?)
 
