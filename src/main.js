@@ -11,6 +11,10 @@ const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 if (process.mas) app.setName('飞书Feishu');
 
+// fixup High CPU Usage issue
+// see https://github.com/electron/electron/issues/11908
+app.disableHardwareAcceleration();
+
 // 是否处于焦点，检点监听
 var onFocus = false;
 app.on('browser-window-blur', function () {
