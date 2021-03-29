@@ -246,39 +246,6 @@ function getConfigJson(callback){
 
 }
 
-
-let os = require("os");
-const spawn  = require('child_process')
-let monit = null;
-if(os.platform() === 'linux'){
-    console.log('设置屏幕监听')
-    monit = spawn.exec(`dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver'" |
-    while read x; do
-      case "$x" in 
-        *"boolean true"*) echo SCREEN_LOCKED;;
-        *"boolean false"*) echo SCREEN_UNLOCKED;;  
-      esac
-    done `)
-
-    monit.stdout.on('data', (data) => {
-        console.log('监听到屏幕重启')
-        const out = data.toString().trim()
-        if (out === 'SCREEN_UNLOCKED') {
-            newAppTray.destroy()
-            appTrayInit()
-        }
-    })
-
-    monit.stderr.on('data', function (data) {
-        console.log('stderr: ' + data);
-    });
-
-    monit.on('exit', function (code) {
-        console.log('child process exited with code ' + code);
-    });    
-}
-
-
 // ------------------------ App ------------------------------------
 app.on('ready', function () {
     
