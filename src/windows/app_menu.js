@@ -1,4 +1,9 @@
 'use strict';
+
+let electron = require('electron')
+let BrowserWindow = electron.BrowserWindow;
+
+
 //------------------------------ 设置菜单 --------------------------
 /**
  * 注册键盘快捷键
@@ -8,64 +13,47 @@ let template = [
     {
         label: '操作',
         submenu: [
-            // {
-            //     label: '复制',
-            //     accelerator: 'CmdOrCtrl+C',
-            //     role: 'copy'
-            // }, 
-            // {
-            //     label: '粘贴',
-            //     accelerator: 'CmdOrCtrl+V',
-            //     role: 'paste'
-            // }, 
-            // {
-            //     label: '重新加载',
-            //     accelerator: 'CmdOrCtrl+R',
-            //     click: function (item, focusedWindow) {
-            //         if (focusedWindow) {
-            //             // on reload, start fresh and close any old
-            //             // open secondary windows
-            //             if (focusedWindow.id === 1) {
-            //                 BrowserWindow.getAllWindows().forEach(function (win) {
-            //                     if (win.id > 1) {
-            //                         win.close()
-            //                     }
-            //                 })
-            //             }
-            //             focusedWindow.reload()
-            //         }
-            //     }
-            // }
         ]
     },
     {
-        label: '窗口',
+        label: '设置',
         role: 'window',
-        submenu: [{
-            label: '最小化',
-            accelerator: 'CmdOrCtrl+M',
-            role: 'minimize'
-        }, {
-            label: '关闭',
-            accelerator: 'CmdOrCtrl+W',
-            role: 'close'
-        }, {
-            label: '切换开发者工具',
-            accelerator: (function () {
-                if (process.platform === 'darwin') {
-                    return 'Alt+Command+I'
-                } else {
-                    return 'Ctrl+Shift+I'
+        submenu: [
+            {
+                label: '功能设置',
+                click: function (item, focusedWindow) {
+                    openSettingsWindows();
                 }
-            })(),
-            click: function (item, focusedWindow) {
-                if (focusedWindow) {
-                    focusedWindow.toggleDevTools()
+            }, 
+            {
+                label: '最小化',
+                accelerator: 'CmdOrCtrl+M',
+                role: 'minimize'
+            }, 
+            {
+                label: '关闭',
+                accelerator: 'CmdOrCtrl+W',
+                role: 'close'
+            }, 
+            {
+                label: '切换开发者工具',
+                accelerator: (function () {
+                    if (process.platform === 'darwin') {
+                        return 'Alt+Command+I'
+                    } else {
+                        return 'Ctrl+Shift+I'
+                    }
+                })(),
+                click: function (item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.toggleDevTools()
+                    }
                 }
+            }, 
+            {
+                type: 'separator'
             }
-        }, {
-            type: 'separator'
-        }]
+        ]
     },
     {
         label: '帮助',
@@ -78,6 +66,32 @@ let template = [
         }]
     }
 ]
+
+
+/**
+ * 打开设置窗口
+ */
+function openSettingsWindows(){
+    let settingsWindow = null;
+    if(settingsWindow == null) {
+        settingsWindow = new BrowserWindow({
+            width: 700,
+            height: 650,
+            frame: false,
+            // height: 200,
+            resizable: false,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            },
+        });
+
+        // console.log(settingsWindow)
+        // settingsWindow.loadUrl('file://' + __dirname + '/app/settings.html');
+        settingsWindow.loadURL('file://' +__dirname+ '/views/settings.html');
+        // settingsWindow.toggleDevTools();
+    }
+}
 
 /**
 * 增加更新相关的菜单选项

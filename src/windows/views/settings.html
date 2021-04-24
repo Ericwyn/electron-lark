@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+
+    <!-- MDUI CSS -->
+    <link rel="stylesheet" href="mdui.min.css"/>
+
+    <title>设置</title>
+    <style>
+        body{
+            padding-top: 20px;
+        }
+
+        [v-cloak]{
+            display: none;
+        }
+
+        /*.doc-title {*/
+        /*    font-size: 34px;*/
+        /*    line-height: 40px;*/
+        /*    margin: 0 400px 30px 0;*/
+        /*}*/
+
+
+        .set-title-panel{
+            margin-top: -10px;
+            font-size: 28px;
+            line-height: 34px;
+        }
+
+        .set-content-panel{
+            margin-top: 40px;
+        }
+
+        .set-save-panel{
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .loadPage{
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 100;
+        }
+
+    </style>
+</head>
+
+<body class="mdui-theme-primary-blue" >
+
+<div class="mdui-container-fluid" id="page" v-cloak>
+    <div class="loadPage"  v-if="!handLoadStorage">
+        <div class="mdui-spinner mdui-center" style="margin-top: calc(45vh)">
+            <div class="mdui-spinner-layer ">
+                <div class="mdui-spinner-circle-clipper mdui-spinner-left">
+                    <div class="mdui-spinner-circle"></div>
+                </div>
+                <div class="mdui-spinner-gap-patch">
+                    <div class="mdui-spinner-circle"></div>
+                </div>
+                <div class="mdui-spinner-circle-clipper mdui-spinner-right">
+                    <div class="mdui-spinner-circle"></div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center">
+            <p>正在载入设置选项</p>
+        </div>
+    </div>
+    <div v-else class="">
+        <div class="" style="height: calc(100vh);position: fixed;width: 150px;top:20px">
+            <div class="drawer">
+                <ul class="mdui-list">
+                    <li class="mdui-list-item mdui-ripple" onclick="showPage('link-set')">
+                        <div class="mdui-list-item-content">外链设置</div>
+                    </li>
+                    <li class="mdui-list-item mdui-ripple" onclick="showPage('host-set')">
+                        <div class="mdui-list-item-content">服务器设置</div>
+                    </li>
+                    <li class="mdui-list-item mdui-ripple" onclick="exitSetting()">
+                        <div class="mdui-list-item-content">退出设置</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="" style="padding-left: 180px">
+            <div v-if="pageShow==='host-set'">
+                <div class="set-title-panel">
+                    <p class="doc-title">服务器设置</p>
+                </div>
+                <div class="set-content-panel">
+                    <p>程序默认打开为网页版飞书登录页面</p>
+                    <p>如果公司使用的是特殊的飞书登录地址</p>
+                    <p>设置完毕请手动重启应用</p>
+                    <p></p>
+                    <p>设置完毕请重启应用</p>
+                    <div class="mdui-textfield">
+                        <textarea class="mdui-textfield-input"
+                                  placeholder="默认为: https://feishu.cn/messenger/"
+                                  v-model="startPageLink"></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <div v-if="pageShow==='link-set'">
+                <div class="set-title-panel">
+                    <p class="doc-title">外链设置</p>
+                </div>
+                <div class="set-content-panel">
+                    <p>此处可设置使用 electron 打开的链接, 每行设置一个链接</p>
+                    <p>electron-lark 会对聊天记录当中打开的每个链接进行 indexOf 判断</p>
+                    <p>如果 URL 包含下方中任意一行的内容，则在 electron 内打开</p>
+                    <p>否则将在浏览器中打开</p>
+                    <p></p>
+                    <p>设置完毕请手动重启应用</p>
+                    <div class="mdui-textfield" style="margin-top: 20px;">
+                    <textarea class="mdui-textfield-input"
+                              v-model="larkOpenLink"
+                              onclick="btnSaveClick()"
+                              style="background: #f1f1f1; padding: 10px" rows="10"
+                              placeholder="请在此处设置需要在 electron 内打开的链接，如&#13;&#10;https://github.com&#13;&#10;https://google.com"></textarea>
+                    </div>
+
+                </div>
+<!--                <div class="set-save-panel">-->
+<!--                    <button class="mdui-btn mdui-color-blue mdui-text-color-white mdui-ripple"-->
+<!--                            onclick="">保存设置</button>-->
+<!--                </div>-->
+            </div>
+
+            <div class="set-save-panel">
+                <button class="mdui-btn mdui-color-blue mdui-text-color-white mdui-ripple"
+                        onclick="btnSaveClick()">保存设置</button>
+<!--                <button class="mdui-btn mdui-color-blue mdui-text-color-white mdui-ripple"-->
+<!--                        onclick="btnSaveClick()">重启应用</button>-->
+            </div>
+
+        </div>
+
+    </div>
+<!--    <div class="mdui-drawer mdui-drawer-open mdui-drawer-full-height">-->
+<!--        <ul class="mdui-list">-->
+<!--            <li class="mdui-list-item mdui-ripple" onclick="showPage('link-set')">-->
+<!--                <div class="mdui-list-item-content">外链设置</div>-->
+<!--            </li>-->
+<!--            <li class="mdui-list-item mdui-ripple" onclick="showPage('host-set')">-->
+<!--                <div class="mdui-list-item-content">服务器设置</div>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </div>-->
+
+</div>
+
+
+</body>
+<script src="vue.min.js" type="text/javascript"></script>
+<script src="mdui.min.js" type="text/javascript"></script>
+<script>
+
+    let appStoreFs = require("fs");
+
+
+    // const Store = require('electron-store');
+    // appStore = new Store();
+    console.log("载入 electron-store 成功")
+    console.log(appStoreFs)
+
+    const KEY_START_PAGE = "startPageLink"
+    const KEY_LARK_OPEN_LINK = "larkOpenLink"
+
+    let pageData = {
+        pageShow: 'link-set',
+        handLoadStorage: true,
+        startPageLink: null, // 启动页设置
+        larkOpenLink: null, // 需要在 electron 内打开的链接
+    };
+
+    getConfigJson();
+
+    let vuePage = new Vue({
+        el: "#page",
+        data: pageData,
+        methods: {
+
+        }
+    });
+
+    function showPage(page){
+        pageData.pageShow = page
+    }
+
+    function btnSaveClick(){
+       saveConfig()
+    }
+
+    // setTimeout(function (){
+    //     appStoreFs = require("fs");
+    //     pageData.handLoadStorage = true;
+    //     console.log("载入完成")
+    //     console.log(appStoreFs)
+    // }, 50)
+
+    function getConfigJson(){
+        appStoreFs.readFile('config.json','utf-8',function(err,data){
+            if(err){
+                console.log(err)
+                console.log("读取json配置文件失败")
+            }
+            else{
+                console.log("read config json:" + data);
+                let configJson = JSON.parse(data);
+                pageData.startPageLink = configJson.startPageLink;
+                pageData.larkOpenLink = configJson.larkOpenLink;
+
+            }
+        });
+    }
+
+    function saveConfig(){
+        if (appStoreFs == null) {
+            console.log("fs 载入失败")
+            return;
+        }
+        let configJson = {
+            startPageLink: pageData.startPageLink,
+            larkOpenLink: pageData.larkOpenLink,
+        }
+        appStoreFs.writeFile("config.json",JSON.stringify(configJson, null, "  "),function (err) {
+            if(err){
+                console.log(err);
+            }else{
+                console.log("配置保存成功")
+                mdui.snackbar({
+                    message: '配置保存成功'
+                });
+
+            }
+        })
+    }
+
+    function exitSetting(){
+        require('electron').webFrame.context.close()
+    }
+
+</script>
+</html>

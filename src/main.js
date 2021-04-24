@@ -3,8 +3,10 @@
 const appConf = require("./configuration")
 
 const electron = require('electron')
+const fs = require('fs')
 const shell = electron.shell;
 const app = electron.app;
+const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 const Menu = electron.Menu;
 if (process.mas) app.setName('飞书Feishu');
@@ -19,28 +21,41 @@ app.on('browser-window-focus', function () {
 })
 app.allowRendererProcessReuse = true
 
+// 托盘对象
+// const appTray = require("./windows/app_tray");
+
+let newAppTray = null;
+const dock32Icon = electron.nativeImage.createFromPath(appConf.dock32)
+const dock32EmptyIcon = electron.nativeImage.createFromPath(appConf.dock32Empty)
 
 // 菜单 Template 
 const appMenu = require("./windows/app_menu")
 
 const globalShortcut = electron.globalShortcut;
 
-let mainWindow
-let webContents
+var mainWindow
+var webContents
 
-function createWindow() {
+function createWindow(configJson) {
     mainWindow = new BrowserWindow({
         width: 1000,
         height: 770,
         webPreferences: {
-            // nodeIntegration: true
+            nodeIntegration: true
         },
         icon: appConf.icon128
     })
 
     // mainWindow.loadFile('index.html')
     // 改为使用loadURL加载飞书地址
-    mainWindow.loadURL('https://feishu.cn/messenger/', {
+    let loadUrl = "https://feishu.cn/messenger/";
+    if (configJson.startPageLink !== undefined
+        && configJson.startPageLink != null
+        && configJson.startPageLink.trim() != "") {
+        loadUrl = configJson.startPageLink
+    }
+    console.log("load main page: " + loadUrl)
+    mainWindow.loadURL(loadUrl, {
         userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36'
         // userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.158 Electron/8.2.0 Safari/537.36"
     })
@@ -63,7 +78,6 @@ function createWindow() {
             if(mainWindow != null && !mainWindow.isVisible){
                 return
             }
-            // 注入 消息监听
             webContents.executeJavaScript(`document.getElementsByClassName('larkc-badge-count circle larkc-badge-normal').length`)
                 .then(function(result){
                     if(parseInt(result) > 0) {
@@ -72,27 +86,34 @@ function createWindow() {
                         stopBlingIcon();
                     }
                 })
-            // 注入水印去除
             webContents.executeJavaScript(`if(document.getElementsByClassName('lark-water-mark-main').length > 0) document.getElementsByClassName('lark-water-mark-main')[0].remove()`)
         }, 1500);
     })
+
+    // 定义在 electron 内部打开的 url，除此之外的 url 都跳转浏览器打开，使用 indexOf >= 0 来判断
+    let electronUrl = [
+    ]
+    if (configJson.larkOpenLink !== undefined && configJson.larkOpenLink !== null){
+        electronUrl = ("" + configJson.larkOpenLink).split("\n")
+    }
 
     // 设置新窗口的 user agent
     webContents.on("new-window", function(event, url, frameName, disposition, options, features, referer){
         // feishu.cn/calendar/ 日历
         // feishu.cn/space/home/ 文档
-        // console.log("打开 url " + url)
+        console.log("open url " + url)
         event.preventDefault()
+        
+        let openInElectron = false
+        for(let i=0;i<electronUrl.length; i++){
+            if(electronUrl[i].trim() != "" && url.indexOf(electronUrl[i]) >= 0) {
+                openInElectron = true;
+                console.log("open url electron")
+                break;
+            }
+        }
 
-        // hack 所有新页面的打开
-        // 如果是跳转外部连接的话， 用默认浏览器打开
-        if(url.indexOf("https://security.feishu.cn/link/safety?target=") == 0){
-            url = url.replace("https://security.feishu.cn/link/safety?target=", "")
-            url = decodeURIComponent(url);
-            shell.openExternal(url)
-            return;
-        } else {
-            // 如果不是跳转到外部的链接
+        if(openInElectron) {
             // 将所有打开的新页面的 user agent 也重新设置，避免提示浏览器错误
             const win = new BrowserWindow({
                 width: 1200,
@@ -107,19 +128,56 @@ function createWindow() {
               })
             }
             event.newGuest = win;
+        } else {
+            shell.openExternal(url)
+            return;
         }
-
     })
 
     // 打开开发者模式
     // mainWindow.toggleDevTools()
 }
 
+var blingCount = 0;
+var blingTimer = null;
+function startBlingIcon() {
+    // 部分修复ubuntu18.04 下面锁屏之后 dock 图标一直不显示的问题
+    // 每次 start bling 之前重新设置一遍
+    // 保证哪怕因为锁屏而 dock 图标消失之后，收到新消息也可以闪烁
+    // appTray.appTray.destroy()
+    // appTray.init(electron, app, mainWindow)
 
-// ------------------------ Tray ------------------------------------
-let blingCount = 0;
-let blingTimer = null;
-let appTryaInstance;
+    // 如果是焦点的话，就不闪烁
+    if (onFocus && mainWindow.isVisible()) {
+        stopBlingIcon()
+        return
+    }
+    if (blingTimer != null) {
+        return
+    }
+    blingTimer = setInterval(function () {
+        blingCount++;
+        if (blingCount % 2 == 0) {
+            newAppTray.setImage(dock32EmptyIcon)
+        } else {
+            newAppTray.setImage(dock32Icon)
+        }
+    }, 500);
+}
+
+function stopBlingIcon() {
+    if (blingTimer != null) {
+        clearInterval(blingTimer)
+        blingTimer = null;
+    }
+    newAppTray.setImage(dock32Icon)
+}
+
+
+// 修复 Application Menu上图标不显示
+if (process.env.XDG_CURRENT_DESKTOP == 'ubuntu:GNOME') {
+    process.env.XDG_CURRENT_DESKTOP = 'Unity';
+}
 
 const trayMenuTemplate = [
     {
@@ -132,61 +190,39 @@ const trayMenuTemplate = [
     }
 ];
 const contextMenu = electron.Menu.buildFromTemplate(trayMenuTemplate)
-const dock32Icon = electron.nativeImage.createFromPath(appConf.dock32)
-const dock32EmptyIcon = electron.nativeImage.createFromPath(appConf.dock32Empty)
 
 function appTrayInit(){
-    appTryaInstance = new electron.Tray(dock32Icon)
-    appTryaInstance.setToolTip('Feishu1111');
-    appTryaInstance.setContextMenu(contextMenu);
-    appTryaInstance.on('click',function () {
+    newAppTray = new electron.Tray(dock32Icon);
+    newAppTray.setToolTip('Feishu');
+    newAppTray.setContextMenu(contextMenu);
+    newAppTray.on('click',function () {
         stopBlingIcon();
         mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
         mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
     })
-
 }
 
-function startBlingIcon() {
-    // 如果是焦点的话，就不闪烁
-    if (onFocus && mainWindow.isVisible()) {
-        stopBlingIcon()
-        return
-    }
-    if (blingTimer != null) {
-        return
-    }
-    blingTimer = setInterval(function () {
-        blingCount++;
-        if (blingCount % 2 == 0) {
-            appTryaInstance.setImage(dock32EmptyIcon)
-        } else {
-            appTryaInstance.setImage(dock32Icon)
+function getConfigJson(callback){
+    fs.readFile('config.json','utf-8',function(err,data){
+        if(err){
+            console.error("load config error, may be have no config file~");
+            callback({})
         }
-    }, 500);
+        else{
+            console.log("read config json:" + data);
+            callback(JSON.parse(data))
+        }
+    });
+
+
 }
 
-function stopBlingIcon() {
-    if (blingTimer != null) {
-        clearInterval(blingTimer)
-        blingTimer = null;
-    }
-    appTryaInstance.setImage(appConf.dock32)
-}
 
-
-// 修复 Application Menu上图标不显示
-if (process.env.XDG_CURRENT_DESKTOP == 'ubuntu:GNOME') {
-    process.env.XDG_CURRENT_DESKTOP = 'Unity';
-}
-
-// 通过监听屏幕 LOCK 和 UNLOCK 来重新 init tray
-// 解决锁屏后 tray 消失的问题
 let os = require("os");
 const spawn  = require('child_process')
 let monit = null;
 if(os.platform() === 'linux'){
-    // console.log('设置屏幕监听')
+    console.log('设置屏幕监听')
     monit = spawn.exec(`dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver'" |
     while read x; do
       case "$x" in 
@@ -196,10 +232,10 @@ if(os.platform() === 'linux'){
     done `)
 
     monit.stdout.on('data', (data) => {
-        // console.log('监听到屏幕重启')
+        console.log('监听到屏幕重启')
         const out = data.toString().trim()
         if (out === 'SCREEN_UNLOCKED') {
-            appTryaInstance.destroy()
+            newAppTray.destroy()
             appTrayInit()
         }
     })
@@ -223,17 +259,30 @@ app.on('ready', function () {
     // 设置菜单部分
     Menu.setApplicationMenu(menu) 
     
-    //系统托盘 init
+    // 系统托盘设置
+    // 托盘图标
     appTrayInit()
+
+    globalShortcut.register('alt+shift+q', () => {
+        console.log("托盘销毁情况")
+        console.log(newAppTray.isDestroyed())
+    })
 
     globalShortcut.register('alt+shift+m', () => {
         // console.log('alt+shift+m is pressed')
-        appTryaInstance.destroy()
+        newAppTray.destroy()
         appTrayInit()
+        // appTray.init(electron, app, mainWindow)
         mainWindow.show()
         mainWindow.setSkipTaskbar(true);
     })
-    createWindow();
+
+    // app on 了之后先进行 ajax 请求配置详情，成功之后再 createWindows
+    getConfigJson(function (json){
+        console.log(json)
+        createWindow(json);
+    })
+
 })
 
 app.on('window-all-closed', () => {
