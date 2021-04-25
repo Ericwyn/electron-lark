@@ -21,9 +21,6 @@ app.on('browser-window-focus', function () {
 })
 app.allowRendererProcessReuse = true
 
-// 托盘对象
-// const appTray = require("./windows/app_tray");
-
 let newAppTray = null;
 const dock32Icon = electron.nativeImage.createFromPath(appConf.dock32)
 const dock32EmptyIcon = electron.nativeImage.createFromPath(appConf.dock32Empty)
@@ -70,6 +67,12 @@ function createWindow(configJson) {
         event.preventDefault();
     });
 
+    let showWarterMark = false;
+    if(configJson.showWarterMark !== undefined
+        && configJson.showWarterMark != null) {
+        showWarterMark = configJson.showWarterMark;
+    }
+
     // 窗口加载完成后运行
     // 关于图标的闪烁，方法是每1.5s做一个轮询，查看是否有未读消息提醒，如果有的话就闪烁
     // 侧边栏 class 为 larkc-badge-count circle navbarMenu-badge larkc-badge-normal
@@ -86,7 +89,9 @@ function createWindow(configJson) {
                         stopBlingIcon();
                     }
                 })
-            webContents.executeJavaScript(`if(document.getElementsByClassName('lark-water-mark-main').length > 0) document.getElementsByClassName('lark-water-mark-main')[0].remove()`)
+            if(!showWarterMark) {
+                webContents.executeJavaScript(`if(document.getElementsByClassName('lark-water-mark-main').length > 0) document.getElementsByClassName('lark-water-mark-main')[0].remove()`)
+            }
         }, 1500);
     })
 
@@ -138,8 +143,9 @@ function createWindow(configJson) {
     // mainWindow.toggleDevTools()
 }
 
-var blingCount = 0;
-var blingTimer = null;
+let blingCount = 0;
+let blingTimer = null;
+let bling = false;
 function startBlingIcon() {
     // 部分修复ubuntu18.04 下面锁屏之后 dock 图标一直不显示的问题
     // 每次 start bling 之前重新设置一遍
@@ -155,6 +161,7 @@ function startBlingIcon() {
     if (blingTimer != null) {
         return
     }
+    bling = true;
     blingTimer = setInterval(function () {
         blingCount++;
         if (blingCount % 2 == 0) {
@@ -162,15 +169,20 @@ function startBlingIcon() {
         } else {
             newAppTray.setImage(dock32Icon)
         }
+        // 避免 count 无限增大
+        if(blingCount == 1000) blingCount = 0
     }, 500);
 }
 
 function stopBlingIcon() {
-    if (blingTimer != null) {
-        clearInterval(blingTimer)
-        blingTimer = null;
+    if(bling) {
+        if (blingTimer != null) {
+            clearInterval(blingTimer)
+            blingTimer = null;
+        }
+        newAppTray.setImage(dock32Icon)
+        bling = false;
     }
-    newAppTray.setImage(dock32Icon)
 }
 
 
@@ -180,6 +192,14 @@ if (process.env.XDG_CURRENT_DESKTOP == 'ubuntu:GNOME') {
 }
 
 const trayMenuTemplate = [
+    {
+        label: '显示主界面',
+        click: function(){
+            if(mainWindow != null && !mainWindow.isVisible()){
+                mainWindow.show()
+            }
+        }
+    },
     {
         label: '退出',
         click: function(){
@@ -199,6 +219,11 @@ function appTrayInit(){
         stopBlingIcon();
         mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
         mainWindow.isVisible() ? mainWindow.setSkipTaskbar(false) : mainWindow.setSkipTaskbar(true);
+    })
+    newAppTray.on('double-click', function() {
+        if(mainWindow != null && !mainWindow.isVisible()){
+            mainWindow.show()
+        }
     })
 }
 
