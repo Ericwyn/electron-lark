@@ -27,7 +27,9 @@
         /*    margin: 0 400px 30px 0;*/
         /*}*/
 
-
+        .container{
+            padding-right: 60px;
+        }
         .set-title-panel{
             margin-top: -10px;
             font-size: 28px;
@@ -51,12 +53,22 @@
             z-index: 100;
         }
 
+        .drawer-item {
+            font-size: 16px;
+        }
+
     </style>
 </head>
 
 <body class="mdui-theme-primary-blue" >
 
 <div class="mdui-container-fluid" id="page" v-cloak>
+    <div class="close-panel" >
+        <button class="mdui-btn mdui-color-white mdui-text-color-gray"
+            style="position: fixed;top: 30px;right:0px;"
+            onclick="exitSetting()"
+            >返回</button>
+    </div>
     <div class="loadPage"  v-if="!handLoadStorage">
         <div class="mdui-spinner mdui-center" style="margin-top: calc(45vh)">
             <div class="mdui-spinner-layer ">
@@ -80,18 +92,21 @@
             <div class="drawer">
                 <ul class="mdui-list">
                     <li class="mdui-list-item mdui-ripple" onclick="showPage('link-set')">
-                        <div class="mdui-list-item-content">外链设置</div>
+                        <div class="mdui-list-item-content drawer-item">外链设置</div>
+                    </li>
+                    <li class="mdui-list-item mdui-ripple" onclick="showPage('wartermark-set')">
+                        <div class="mdui-list-item-content drawer-item">水印设置</div>
                     </li>
                     <li class="mdui-list-item mdui-ripple" onclick="showPage('host-set')">
-                        <div class="mdui-list-item-content">服务器设置</div>
+                        <div class="mdui-list-item-content drawer-item">服务器设置</div>
                     </li>
-                    <li class="mdui-list-item mdui-ripple" onclick="exitSetting()">
-                        <div class="mdui-list-item-content">退出设置</div>
+                    <li class="mdui-list-item mdui-ripple" onclick="showPage('version-info')">
+                        <div class="mdui-list-item-content drawer-item">版本信息</div>
                     </li>
                 </ul>
             </div>
         </div>
-        <div class="" style="padding-left: 180px">
+        <div class="container" style="padding-left: 180px">
             <div v-if="pageShow==='host-set'">
                 <div class="set-title-panel">
                     <p class="doc-title">服务器设置</p>
@@ -99,15 +114,34 @@
                 <div class="set-content-panel">
                     <p>程序默认打开为网页版飞书登录页面</p>
                     <p>如果公司使用的是特殊的飞书登录地址</p>
-                    <p>设置完毕请手动重启应用</p>
+                    <p>请在下方设置程序启动页面为其他地址</p>
                     <p></p>
-                    <p>设置完毕请重启应用</p>
+                    <p>设置完毕请手动重启应用</p>
                     <div class="mdui-textfield">
                         <textarea class="mdui-textfield-input"
                                   placeholder="默认为: https://feishu.cn/messenger/"
                                   v-model="startPageLink"></textarea>
                     </div>
 
+                </div>
+            </div>
+
+
+            <div v-if="pageShow==='wartermark-set'">
+                <div class="set-title-panel">
+                    <p class="doc-title">水印设置</p>
+                </div>
+                <div class="set-content-panel">
+                    <label class="mdui-switch">
+                        <span style="margin-right:20px">显示页面水印</span>
+                        <label class="mdui-switch">
+                            <input type="checkbox" v-model="showWarterMark">
+                            <i class="mdui-switch-icon"></i>
+                          </label>
+                    </label>
+                    <br><br>
+                    <p>打开后，将会显示飞书水印</p>
+                    <p>设置完毕请手动重启应用</p>
                 </div>
             </div>
 
@@ -125,19 +159,34 @@
                     <div class="mdui-textfield" style="margin-top: 20px;">
                     <textarea class="mdui-textfield-input"
                               v-model="larkOpenLink"
-                              onclick="btnSaveClick()"
                               style="background: #f1f1f1; padding: 10px" rows="10"
                               placeholder="请在此处设置需要在 electron 内打开的链接，如&#13;&#10;https://github.com&#13;&#10;https://google.com"></textarea>
                     </div>
-
                 </div>
-<!--                <div class="set-save-panel">-->
-<!--                    <button class="mdui-btn mdui-color-blue mdui-text-color-white mdui-ripple"-->
-<!--                            onclick="">保存设置</button>-->
-<!--                </div>-->
             </div>
 
-            <div class="set-save-panel">
+            <div v-if="pageShow==='version-info'">
+                <div class="set-title-panel">
+                    <p class="doc-title">版本信息</p>
+                </div>
+                <div class="set-content-panel">
+                    <p>当前版本 : <span class="mdui-text-color-pink">{{packageVersion}}</span></p>
+                    <br>
+                    <p>基于网页版飞书的简单套壳，代码粗糙，能用即可</p>
+                    <br>
+                    <p>项目地址: https://github.com/Ericwyn/electron-lark</p>
+                    <p>可前往 Release 页面查看并下载最新版本</p>
+                    <br>
+                    <button class="mdui-btn mdui-color-pink mdui-text-color-white" 
+                        onclick="gotoGitub()">前往项目地址</button>
+                    <br><br>
+                    <button class="mdui-btn mdui-color-pink mdui-text-color-white"
+                        onclick="gotoRelease()">前往 Release</button>
+                   
+                </div>
+            </div>
+
+            <div v-if="pageShow !='version-info'" class="set-save-panel">
                 <button class="mdui-btn mdui-color-blue mdui-text-color-white mdui-ripple"
                         onclick="btnSaveClick()">保存设置</button>
 <!--                <button class="mdui-btn mdui-color-blue mdui-text-color-white mdui-ripple"-->
@@ -147,16 +196,6 @@
         </div>
 
     </div>
-<!--    <div class="mdui-drawer mdui-drawer-open mdui-drawer-full-height">-->
-<!--        <ul class="mdui-list">-->
-<!--            <li class="mdui-list-item mdui-ripple" onclick="showPage('link-set')">-->
-<!--                <div class="mdui-list-item-content">外链设置</div>-->
-<!--            </li>-->
-<!--            <li class="mdui-list-item mdui-ripple" onclick="showPage('host-set')">-->
-<!--                <div class="mdui-list-item-content">服务器设置</div>-->
-<!--            </li>-->
-<!--        </ul>-->
-<!--    </div>-->
 
 </div>
 
@@ -168,9 +207,6 @@
 
     let appStoreFs = require("fs");
 
-
-    // const Store = require('electron-store');
-    // appStore = new Store();
     console.log("载入 electron-store 成功")
     console.log(appStoreFs)
 
@@ -182,6 +218,8 @@
         handLoadStorage: true,
         startPageLink: null, // 启动页设置
         larkOpenLink: null, // 需要在 electron 内打开的链接
+        showWarterMark: false,
+        packageVersion: "未知版本",
     };
 
     getConfigJson();
@@ -194,6 +232,13 @@
         }
     });
 
+    // 读取版本信息
+    try{
+        const path = require('path')
+        let packageVersion = require(path.join(__dirname, './../../../package.json')).version
+        pageData.packageVersion = packageVersion;
+    }catch(e) {}
+
     function showPage(page){
         pageData.pageShow = page
     }
@@ -202,14 +247,8 @@
        saveConfig()
     }
 
-    // setTimeout(function (){
-    //     appStoreFs = require("fs");
-    //     pageData.handLoadStorage = true;
-    //     console.log("载入完成")
-    //     console.log(appStoreFs)
-    // }, 50)
-
     function getConfigJson(){
+        if(appStoreFs == null) return
         appStoreFs.readFile('config.json','utf-8',function(err,data){
             if(err){
                 console.log(err)
@@ -220,7 +259,7 @@
                 let configJson = JSON.parse(data);
                 pageData.startPageLink = configJson.startPageLink;
                 pageData.larkOpenLink = configJson.larkOpenLink;
-
+                pageData.showWarterMark = configJson.showWarterMark;
             }
         });
     }
@@ -233,6 +272,7 @@
         let configJson = {
             startPageLink: pageData.startPageLink,
             larkOpenLink: pageData.larkOpenLink,
+            showWarterMark: pageData.showWarterMark,
         }
         appStoreFs.writeFile("config.json",JSON.stringify(configJson, null, "  "),function (err) {
             if(err){
@@ -249,6 +289,14 @@
 
     function exitSetting(){
         require('electron').webFrame.context.close()
+    }
+
+    function gotoGitub(){
+        require('electron').shell.openExternal('https://github.com/Ericwyn/electron-lark')
+    }
+
+    function gotoRelease(){
+        require('electron').shell.openExternal('https://github.com/Ericwyn/electron-lark/releases')
     }
 
 </script>
