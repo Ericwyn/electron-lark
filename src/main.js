@@ -16,7 +16,7 @@ if (process.mas) app.setName('飞书Feishu');
 app.disableHardwareAcceleration();
 
 // 是否处于焦点，检点监听
-var onFocus = false;
+let onFocus = false;
 app.on('browser-window-blur', function () {
     onFocus = false;
 })
@@ -34,8 +34,8 @@ const appMenu = require("./windows/app_menu")
 
 const globalShortcut = electron.globalShortcut;
 
-var mainWindow
-var webContents
+let mainWindow
+let webContents
 
 function createWindow(configJson) {
     mainWindow = new BrowserWindow({
@@ -199,7 +199,7 @@ const trayMenuTemplate = [
     {
         label: '显示主界面',
         click: function(){
-            if(mainWindow != null && !mainWindow.isVisible()){
+            if(mainWindow != null){
                 mainWindow.show()
             }
         }
@@ -259,18 +259,13 @@ app.on('ready', function () {
     // 托盘图标
     appTrayInit()
 
-    globalShortcut.register('alt+shift+q', () => {
-        console.log("托盘销毁情况")
-        console.log(newAppTray.isDestroyed())
-    })
+    // globalShortcut.register('alt+shift+q', () => {
+    //     console.log("托盘销毁情况")
+    //     console.log(newAppTray.isDestroyed())
+    // })
 
     globalShortcut.register('alt+shift+m', () => {
-        // console.log('alt+shift+m is pressed')
-        newAppTray.destroy()
-        appTrayInit()
-        // appTray.init(electron, app, mainWindow)
         mainWindow.show()
-        mainWindow.setSkipTaskbar(true);
     })
 
     // app on 了之后先进行 ajax 请求配置详情，成功之后再 createWindows
