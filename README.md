@@ -15,20 +15,34 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 - 解除浏览器限制，避免因浏览器版本不对而提示无法使用
 
 已知问题
+ - 部分功能无法使用(工作台/会议等)
+    - 飞书网页版缺陷，请向官方反馈
+
+历史问题
  - ~~ubuntu18.04 Gnome 桌面，锁屏之后，系统通知栏图标 Tray 会消失, 当前规避方案如下~~
     - ~~当有新消息提醒的时候，会重置通知栏图标 tray，保证哪怕因为锁屏导致 tray 消失，在收到新消息之后也会重新出现并闪烁~~
     - 使用 alt + shift + m 的快捷键，重新显示界面以及 dock 图标
-    - V1.0.3 版本已修复，添加了一个 linux 锁屏监听，自动 reset appTray
+    - ~~V1.0.3 版本已修复，添加了一个 linux 锁屏监听，自动 reset appTray~~
+        - V1.1.1 版本升级了 electron 依赖，问题解决~
 
 
 (另外有一说一, 飞书的技术架构就是基于 Electron 的, Windows 和 Mac 客户端也都是使用 Electron 打包, 既然如此为什么不顺便为 Linux 也提供支持呢 ?)
 
+ - 2021-04-26更新：后知后觉 deepin 商店已经有 wine 版本的飞书了，详情可看这个 [deepin官方帖子](https://bbs.deepin.org/post/208466)
+    
+   如果公司使用的并不是自己部署版本的飞书的话，可以尝试一下，ubuntu 上面可以再加一个 [deepin-wine-ubuntu](https://github.com/wszqkzqk/deepin-wine-ubuntu/issues/269) 
 
 ## 运行截图
 
 ![screen-shot](screenshot/electron-lark-1.png)
 
 ## 版本记录
+### V1.1.1
+抄了 [ttys3](https://github.com/ttys3) 大佬的作业，感谢大佬！
+ - 禁用硬件加速来修复 CPU 占用过高的问题 [issue12](https://github.com/Ericwyn/electron-lark/issues/12)
+ - 升级 electron 到 13.0.0-bate 解决 appTray 消失问题，不再使用 dbus-monitor 方案
+ - 支持点击通知打开应用，使用拦截网页消息通知并使用 electron 来重新发送的方式实现
+
 ### v1.1.0
  - 咕咕咕了很久的设置界面终于加上了 (~~又不是不能用~~)
  
