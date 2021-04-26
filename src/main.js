@@ -8,6 +8,7 @@ const shell = electron.shell;
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
+const Notification = electron.Notification;
 const Menu = electron.Menu;
 if (process.mas) app.setName('飞书Feishu');
 
@@ -42,7 +43,8 @@ function createWindow(configJson) {
         width: 1000,
         height: 770,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            contextIsolation: false
         },
         icon: appConf.icon128
     })
@@ -97,6 +99,37 @@ function createWindow(configJson) {
                 webContents.executeJavaScript(`if(document.getElementsByClassName('lark-water-mark-main').length > 0) document.getElementsByClassName('lark-water-mark-main')[0].remove()`)
             }
         }, 1500);
+        
+        // 注入 js，hack html5 的 Notification 接口，并将通知内容转发到 main.js 里
+        webContents.executeJavaScript(`
+            let ipcRenderer = null;
+            try{ipcRenderer = require('electron').ipcRenderer} catch(e) {}
+            let oldNotification = window.Notification;
+            let newNotification = function(title, opt){
+                console.log("hack-title:" + title);
+                console.log("hack-opt:" + JSON.stringify(opt));
+                if(ipcRenderer != null) {
+                    let sendMsg = JSON.stringify({
+                        title: title,
+                        opt: opt
+                    })
+                    try {
+                        ipcRenderer.send("notification", sendMsg);
+                    } catch (e) {
+                        console.log("发送 ipc 消息报错", e);
+                        return new oldNotification(title,opt);
+                    }
+                } else {
+                    return new oldNotification(title,opt);
+                }
+            }
+            newNotification.requestPermission = oldNotification.requestPermission.bind(oldNotification);
+            Object.defineProperty(newNotification, 'permission', {
+                get: () => {
+                    return oldNotification.permission;
+                }
+            });
+            window.Notification = newNotification;`);
     })
 
     // 定义在 electron 内部打开的 url，除此之外的 url 都跳转浏览器打开，使用 indexOf >= 0 来判断
@@ -242,8 +275,6 @@ function getConfigJson(callback){
             callback(JSON.parse(data))
         }
     });
-
-
 }
 
 // ------------------------ App ------------------------------------
@@ -285,3 +316,32 @@ app.on('activate', () => {
         createWindow();
     }
 })
+
+// 接受从载入页面发送过来的通知消息
+ipcMain.on("notification", (event, msg) => {
+    console.log("收到消息")
+    // console.log(event)
+    console.log(msg)
+    let args = JSON.parse(msg)
+    // let title = args.title;
+    // let opt = args.opt;
+    // console.log(args.title, args.opt);
+    // title 是对话框名称，opt 是聊天的具体内容，想看格式的话可以去掉上面那行注释
+    showElectronNotify(args.title, args.opt)
+    event.returnValue = 'pong'
+})
+
+function showElectronNotify(title, opt){
+    if(Notification.isSupported()) {
+        let electronNotification = new Notification({
+            title: title,
+            subtitle : title,
+            body : opt.body,
+            icon: electron.nativeImage.createFromPath(appConf.dock32),
+        });
+        electronNotification.addListener('click', function(){
+            if(mainWindow != null) mainWindow.show();
+        })
+        electronNotification.show();
+    }
+}
