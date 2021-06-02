@@ -319,19 +319,19 @@ app.on('activate', () => {
 
 // 接受从载入页面发送过来的通知消息
 ipcMain.on("notification", (event, msg) => {
-    console.log("收到消息")
+    // console.log("收到消息")
     // console.log(event)
-    console.log(msg)
+    // console.log(msg)
     let args = JSON.parse(msg)
     // let title = args.title;
     // let opt = args.opt;
     // console.log(args.title, args.opt);
     // title 是对话框名称，opt 是聊天的具体内容，想看格式的话可以去掉上面那行注释
-    showElectronNotify(args.title, args.opt)
+    showElectronNotify(args.title, args.opt, args.opt.channelId)
     event.returnValue = 'pong'
 })
 
-function showElectronNotify(title, opt){
+function showElectronNotify(title, opt, channelId){
     if(Notification.isSupported()) {
         let electronNotification = new Notification({
             title: title,
@@ -341,7 +341,24 @@ function showElectronNotify(title, opt){
         });
         electronNotification.addListener('click', function(){
             if(mainWindow != null) mainWindow.show();
+            // 通过注入 js 打开具体的对话聊天框
+            // 参考 https://github.com/Ericwyn/electron-lark/commit/f8c4781fab5c6cd704aa2bba4be0d4d0cedcaab1#commitcomment-51571446
+            if(webContents != null) {
+                try{webContents.executeJavaScript(`
+                    let doms = document.getElementsByTagName("div");
+                    for(let i =0;i<doms.length;i++){
+                        if(doms[i].getAttribute("data-feed-id") == '${channelId}') {
+                            doms[i].click();
+                            break;
+                        }
+                    }
+                `)}catch(e){
+                    console.log(e);
+                }
+            }
         })
         electronNotification.show();
+          
+
     }
 }
