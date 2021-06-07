@@ -345,7 +345,7 @@ function showElectronNotify(title, opt, channelId){
             // 参考 https://github.com/Ericwyn/electron-lark/commit/f8c4781fab5c6cd704aa2bba4be0d4d0cedcaab1#commitcomment-51571446
             if(webContents != null) {
                 try{webContents.executeJavaScript(`
-                    let doms = document.getElementsByTagName("div");
+                    var doms = document.getElementsByTagName("div");
                     for(let i =0;i<doms.length;i++){
                         if(doms[i].getAttribute("data-feed-id") == '${channelId}') {
                             doms[i].click();
