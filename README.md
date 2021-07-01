@@ -37,6 +37,13 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
 ![screen-shot](screenshot/electron-lark-1.png)
 
 ## 版本记录
+
+### V1.1.4
+ - 程序菜单修改，新增 “操作->浏览器打开”，可在浏览器打开当前窗口页面
+
+### V1.1.3
+ - 修复通知消息点击后跳转聊天窗口失败的问题
+
 ### V1.1.2
  - electron 版本升级为 13.0.1
  - 点击消息通知打开应用时候会跳转到具体的聊天窗口, 感谢 [ttys3 的分享](https://github.com/Ericwyn/electron-lark/commit/f8c4781fab5c6cd704aa2bba4be0d4d0cedcaab1#commitcomment-51571446)
