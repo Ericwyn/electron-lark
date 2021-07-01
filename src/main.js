@@ -30,8 +30,8 @@ let newAppTray = null;
 const dock32Icon = electron.nativeImage.createFromPath(appConf.dock32)
 const dock32EmptyIcon = electron.nativeImage.createFromPath(appConf.dock32Empty)
 
-// 菜单 Template 
-const appMenu = require("./windows/app_menu")
+// // 菜单 Template 
+// const appMenu = require("./windows/app_menu")
 
 const globalShortcut = electron.globalShortcut;
 
@@ -277,12 +277,115 @@ function getConfigJson(callback){
     });
 }
 
+// ------------------------ 程序菜单 --------------------------------
+/**
+ * 注册键盘快捷键
+ * 其中：label: '切换开发者工具',这个可以在发布时注释掉
+ */
+let menuTemplate = [
+    {
+        label: '操作',
+        submenu: [
+            {
+                label: '浏览器打开',
+                click: function (item, focusedWindow) {
+                    console.log("open in browser:" + focusedWindow.webContents.getURL());
+                    require('electron').shell.openExternal(focusedWindow.webContents.getURL())
+                }
+            },
+            {
+                label: '最小化',
+                // accelerator: 'CmdOrCtrl+M',
+                role: 'minimize'
+            }, 
+            // {
+            //     label: '关闭窗口',
+            //     accelerator: 'CmdOrCtrl+W',
+            //     role: 'close'
+            // }, 
+            {
+                label: '退出程序',
+                click: function (item, focusedWindow) {
+                    app.quit();
+                    mainWindow.destroy()
+                    // openSettingsWindows();
+                }
+            }, 
+        ]
+    },
+    {
+        label: '设置',
+        role: 'window',
+        submenu: [
+            {
+                label: '功能设置',
+                click: function (item, focusedWindow) {
+                    openSettingsWindows();
+                }
+            }, 
+            {
+                label: '切换开发者工具',
+                accelerator: (function () {
+                    if (process.platform === 'darwin') {
+                        return 'Alt+Command+I'
+                    } else {
+                        return 'Ctrl+Shift+I'
+                    }
+                })(),
+                click: function (item, focusedWindow) {
+                    if (focusedWindow) {
+                        focusedWindow.toggleDevTools()
+                    }
+                }
+            }, 
+            {
+                type: 'separator'
+            }
+        ]
+    },
+    {
+        label: '帮助',
+        role: 'help',
+        submenu: [{
+            label: 'Github',
+            click: function () {
+                require('electron').shell.openExternal('https://github.com/Ericwyn/electron-lark')
+            }
+        }]
+    },
+]
+
+
+/**
+ * 打开设置窗口
+ */
+function openSettingsWindows(){
+    let settingsWindow = null;
+    if(settingsWindow == null) {
+        settingsWindow = new BrowserWindow({
+            width: 700,
+            height: 650,
+            frame: false,
+            // height: 200,
+            resizable: false,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            },
+        });
+
+        // console.log(settingsWindow)
+        // settingsWindow.loadUrl('file://' + __dirname + '/app/settings.html');
+        settingsWindow.loadURL('file://' +__dirname+ '/windows/views/settings.html');
+        // settingsWindow.toggleDevTools();
+    }
+}
+
 // ------------------------ App ------------------------------------
 app.on('ready', function () {
     
     // 系统菜单
-    appMenu.init(electron)
-    const menu = Menu.buildFromTemplate(appMenu.menuTemp)
+    const menu = Menu.buildFromTemplate(menuTemplate)
     // 设置菜单部分
     Menu.setApplicationMenu(menu) 
     
