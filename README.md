@@ -32,11 +32,20 @@ electron 版的飞书 Feishu (原 Lark)，对网页版本进行封装
     
    如果公司使用的并不是自己部署版本的飞书的话，可以尝试一下，ubuntu 上面可以再加一个 [deepin-wine-ubuntu](https://github.com/wszqkzqk/deepin-wine-ubuntu/issues/269) 
 
+ - 2021-10-11更新：飞书在大概 9 月份时候就已发布了 Linux 客户端(当前还是 Beta)，大家可以下载一下官方的看看 ~ 
+   
+   但如果公司使用的是自己部署版本的飞书的话~ 现在看来好像还是只能用网页版套壳 🤷‍♂️
+ 
+
 ## 运行截图
 
 ![screen-shot](screenshot/electron-lark-1.png)
 
 ## 版本记录
+
+### V1.1.5
+ - electron 版本升级为 15.0.0
+ - 修复某些时候设置页面无法关闭的问题
 
 ### V1.1.4
  - 程序菜单修改，新增 “操作->浏览器打开”，可在浏览器打开当前窗口页面
