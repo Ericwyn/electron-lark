@@ -21,7 +21,7 @@
     "start": "electron ."
   },
   "devDependencies": {
-    "electron": "^15.0.0",
+    "electron": "^15.2.0",
     "electron-builder": "^22.13.1",
     "electron-package": "^0.1.0"
   },
@@ -41,5 +41,8 @@
     "desktop": {
       "Encoding": "UTF-8"
     }
+  },
+  "dependencies": {
+    "electron-context-menu": "^3.1.1"
   }
 }
