@@ -4,14 +4,31 @@ const appConf = require("./configuration")
 
 const electron = require('electron')
 const fs = require('fs')
+const updateChecker = require('./updateChecker')
+
 const shell = electron.shell;
 const app = electron.app;
 const ipcMain = electron.ipcMain;
 const BrowserWindow = electron.BrowserWindow;
 const Notification = electron.Notification;
 const Menu = electron.Menu;
-if (process.mas) app.setName('飞书Feishu');
 
+const rightClickContextMenu = require('electron-context-menu');
+
+rightClickContextMenu({
+    showInspectElement: false,
+    showCopyImage: true,
+    showCopyImageAddress: true,
+    showSaveImageAs: true,
+    labels: {
+        copy: '复制',
+        copyImage: '复制图片',
+        copyImageAddress: '复制图片地址',
+        saveImageAs: '图片另存为',
+    },
+});
+
+if (process.mas) app.setName('飞书Feishu');
 // fixup High CPU Usage issue
 // see https://github.com/electron/electron/issues/11908
 app.disableHardwareAcceleration();
@@ -130,6 +147,9 @@ function createWindow(configJson) {
                 }
             });
             window.Notification = newNotification;`);
+
+            // 在页面加载完成之后，检查新版本信息
+            updateChecker.checkInAppStart();
     })
 
     // 定义在 electron 内部打开的 url，除此之外的 url 都跳转浏览器打开，使用 indexOf >= 0 来判断
@@ -346,12 +366,20 @@ let menuTemplate = [
     {
         label: '帮助',
         role: 'help',
-        submenu: [{
-            label: 'Github',
-            click: function () {
-                require('electron').shell.openExternal('https://github.com/Ericwyn/electron-lark')
+        submenu: [
+            {
+                label: '检查新版本',
+                click: function () {
+                    updateChecker.check(true);
+                }
+            },
+            {
+                label: 'Github',
+                click: function () {
+                    require('electron').shell.openExternal('https://github.com/Ericwyn/electron-lark')
+                }
             }
-        }]
+        ]
     },
 ]
 
@@ -430,11 +458,11 @@ ipcMain.on("notification", (event, msg) => {
     // let opt = args.opt;
     // console.log(args.title, args.opt);
     // title 是对话框名称，opt 是聊天的具体内容，想看格式的话可以去掉上面那行注释
-    showElectronNotify(args.title, args.opt, args.opt.channelId)
+    showLarkNotify(args.title, args.opt, args.opt.channelId)
     event.returnValue = 'pong'
 })
 
-function showElectronNotify(title, opt, channelId){
+function showLarkNotify(title, opt, channelId){
     if(Notification.isSupported()) {
         let electronNotification = new Notification({
             title: title,
@@ -461,7 +489,5 @@ function showElectronNotify(title, opt, channelId){
             }
         })
         electronNotification.show();
-          
-
     }
 }
