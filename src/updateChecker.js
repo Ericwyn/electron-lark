@@ -7,7 +7,7 @@ const Notification = electron.Notification;
 const appConf = require("./configuration")
 
 // 检查更新的时间间隔，每天只检查一次
-const checkUpdateExpireTime = 24 * 60 * 60;
+const checkUpdateExpireTime = 3 * 24 * 60 * 60;
 
 let updateCheckJson;
 
